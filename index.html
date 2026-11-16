@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Minha Agenda</title>
+  <meta name="description" content="Agenda e lembretes do dia a dia">
+  <meta name="theme-color" content="#f43f7e">
+
+  <!-- PWA / iPhone -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Agenda">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <header class="topbar">
+    <h1>Mariana
+      <header class="topbar">
+        <h1></h1>
+
+        <p class="welcome-message">
+          Que seu dia seja leve, bonito e cheio de motivos para sorrir. ♡
+        </p>
+
+        <button id="btn-settings" class="icon-btn">
+    </h1>
+    <button id="btn-settings" class="icon-btn" aria-label="Configurações">⚙︎</button>
+  </header>
+
+  <main>
+    <!-- Avisos de lembrete (quando o app está aberto) -->
+    <div id="banners" class="banners" aria-live="polite"></div>
+
+    <!-- Calendário mensal -->
+    <section class="card calendar" aria-label="Calendário">
+      <div class="cal-head">
+        <button id="prev" class="icon-btn" aria-label="Mês anterior">‹</button>
+        <button id="month-title" class="month-title" aria-label="Voltar para hoje"></button>
+        <button id="next" class="icon-btn" aria-label="Próximo mês">›</button>
+      </div>
+      <div class="weekdays" aria-hidden="true">
+        <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+      </div>
+      <div id="grid" class="grid"></div>
+    </section>
+
+    <!-- Agenda do dia selecionado -->
+    <section class="day" aria-label="Agenda do dia">
+      <div class="day-head">
+        <h2 id="day-title"></h2>
+        <span id="day-count" class="muted"></span>
+      </div>
+      <ul id="day-list" class="list"></ul>
+      <p id="day-empty" class="empty" hidden>Nada marcado para este dia 🌿</p>
+    </section>
+  </main>
+
+  <button id="fab" class="fab" aria-label="Novo compromisso">+</button>
+
+  <!-- Formulário de compromisso -->
+  <div id="sheet-event" class="overlay" hidden>
+    <form id="form" class="sheet" autocomplete="off">
+      <div class="sheet-head">
+        <h3 id="form-title">Novo compromisso</h3>
+        <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+      </div>
+
+      <label>Título
+        <input id="f-title" type="text" required maxlength="80" placeholder="Ex.: Consulta, aniversário, remédio...">
+      </label>
+
+      <div class="row">
+        <label>Data
+          <input id="f-date" type="date" required>
+        </label>
+        <label>Hora <small>(opcional)</small>
+          <input id="f-time" type="time">
+        </label>
+      </div>
+
+      <div class="row">
+        <label>Avisar
+          <select id="f-remind">
+            <option value="-1">Sem aviso</option>
+            <option value="0" selected>No horário</option>
+            <option value="5">5 min antes</option>
+            <option value="15">15 min antes</option>
+            <option value="30">30 min antes</option>
+            <option value="60">1 hora antes</option>
+          </select>
+        </label>
+        <label>Repetir
+          <select id="f-repeat">
+            <option value="none">Não repete</option>
+            <option value="daily">Todo dia</option>
+            <option value="weekly">Toda semana</option>
+            <option value="monthly">Todo mês</option>
+            <option value="yearly">Todo ano</option>
+          </select>
+        </label>
+      </div>
+
+      <fieldset>
+        <legend>Categoria</legend>
+        <div id="f-cats" class="chips"></div>
+      </fieldset>
+
+      <label>Anotações <small>(opcional)</small>
+        <textarea id="f-notes" rows="2" maxlength="300"></textarea>
+      </label>
+
+      <button type="submit" class="btn primary">Salvar</button>
+      <button type="button" id="btn-ics" class="btn" hidden>📅 Adicionar ao Calendário do iPhone</button>
+      <button type="button" id="btn-delete" class="btn danger" hidden>Excluir</button>
+    </form>
+  </div>
+
+  <!-- Confirmar exclusão de repetição -->
+  <div id="sheet-delete" class="overlay" hidden>
+    <div class="sheet small">
+      <h3>Excluir compromisso que se repete</h3>
+      <button class="btn" data-choice="one">Só este dia</button>
+      <button class="btn danger" data-choice="all">Todas as repetições</button>
+      <button class="btn" data-choice="cancel">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Configurações -->
+  <div id="sheet-settings" class="overlay" hidden>
+    <div class="sheet">
+      <div class="sheet-head">
+        <h3>Configurações</h3>
+        <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+      </div>
+
+      <h4>Notificações</h4>
+      <p id="notif-status" class="muted"></p>
+      <button id="btn-notif" class="btn primary">Ativar notificações</button>
+      <p class="hint">
+        As notificações do app funcionam enquanto ele está aberto. Para ser avisada
+        mesmo com o app fechado, use “Adicionar ao Calendário do iPhone” dentro de
+        cada compromisso.
+      </p>
+
+      <h4>Backup</h4>
+      <div class="row">
+        <button id="btn-export" class="btn">Exportar</button>
+        <button id="btn-import" class="btn">Importar</button>
+      </div>
+      <input id="file-import" type="file" accept="application/json,.json" hidden>
+
+      <h4>Dados</h4>
+      <button id="btn-clear" class="btn danger">Apagar tudo</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="logic.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
